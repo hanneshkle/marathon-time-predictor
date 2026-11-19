@@ -3,7 +3,7 @@ import pytest
 from marathon_predictor.baseline import riegel_predict
 
 
-def test_target_km_eqals_distance_km():
+def test_target_km_equals_distance_km():
     assert riegel_predict(1800, 42.195) == 1800
 
 
