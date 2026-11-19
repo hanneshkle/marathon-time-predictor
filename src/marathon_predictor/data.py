@@ -7,6 +7,7 @@ Run from the repository root:
 
 import argparse
 
+import numpy as np
 import pandas as pd
 import requests
 
@@ -52,6 +53,7 @@ def clean_berlin(raw: pd.DataFrame) -> pd.DataFrame:
     """Turn raw results into an analysis-ready table.
 
     - converts all split times to seconds
+    - converts zeros to NaN (missing) - some runners have missing split times
     - drops personal identifiers (names, club) - we don't need them for modelling
     - keeps only finishers with a valid finish time
     """
@@ -63,7 +65,7 @@ def clean_berlin(raw: pd.DataFrame) -> pd.DataFrame:
         }
     )
     for col in SPLITS_KM:
-        df[col] = time_to_seconds(raw[col])
+        df[col] = time_to_seconds(raw[col]).replace(0, np.nan)
 
     df = df.dropna(subset=["time_full"]).reset_index(drop=True)
     return df
