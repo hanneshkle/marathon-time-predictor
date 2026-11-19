@@ -26,8 +26,16 @@ def test_clean_berlin_drops_names_and_non_finishers():
             **{
                 col: ["00:30:00", None]
                 for col in [
-                    "split_5k", "split_10k", "split_15k", "split_20k", "time_half",
-                    "split_25k", "split_30k", "split_35k", "split_40k", "time_full",
+                    "split_5k",
+                    "split_10k",
+                    "split_15k",
+                    "split_20k",
+                    "time_half",
+                    "split_25k",
+                    "split_30k",
+                    "split_35k",
+                    "split_40k",
+                    "time_full",
                 ]
             },
         }
@@ -38,3 +46,37 @@ def test_clean_berlin_drops_names_and_non_finishers():
     assert "first_name" not in df.columns
     assert df.loc[0, "gender"] == "F"
     assert df.loc[0, "time_full"] == 1800.0
+
+
+def test_clean_berlin_turns_zero_times_into_nan():
+    raw = pd.DataFrame(
+        {
+            "first_name": ["A", "B"],
+            "last_name": ["X", "Y"],
+            "club": ["Club", "Club"],
+            "nationality": ["GER", "SWE"],
+            "gender": ["W", "M"],
+            "year": [2019, 2019],
+            **{
+                col: ["00:30:00", "00:20:00"]
+                for col in [
+                    "split_5k",
+                    "split_10k",
+                    "split_15k",
+                    "split_20k",
+                    "time_half",
+                    "split_25k",
+                    "split_30k",
+                    "split_35k",
+                    "split_40k",
+                    "time_full",
+                ]
+            },
+        }
+    )
+    raw.loc[0, "split_10k"] = "00:00:00"  # simulate missing split time
+    raw.loc[1, "time_full"] = "00:00:00"  # simulate non-finisher
+    df = clean_berlin(raw)
+
+    assert len(df) == 1  # runner without finish time removed
+    assert pd.isna(df.loc[0, "split_10k"])  # zero split time converted to NaN
